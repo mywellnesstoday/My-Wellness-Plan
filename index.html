@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#385B4A" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="My Wellness" />
+  <title>My Wellness Plan</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <style>
+    :root {
+      --green:#385B4A; --green2:#5E7D6D; --cream:#F7F4EE; --tan:#E8DED0;
+      --brown:#7A4E35; --text:#24312A; --muted:#6C746F; --card:#FFFFFF;
+      --danger:#A64B4B;
+    }
+    * { box-sizing:border-box; }
+    html,body { margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--cream); color:var(--text); }
+    body { padding-bottom:90px; }
+    header { position:sticky; top:0; z-index:5; background:rgba(247,244,238,.95); backdrop-filter:blur(14px); padding:calc(env(safe-area-inset-top) + 10px) 16px 10px; border-bottom:1px solid #ddd4c7; }
+    header h1 { margin:0; font-size:22px; }
+    header .sub { color:var(--muted); font-size:13px; margin-top:3px; }
+    main { max-width:760px; margin:0 auto; padding:14px; }
+    .card { background:var(--card); border-radius:18px; padding:16px; margin-bottom:14px; box-shadow:0 2px 12px rgba(0,0,0,.06); }
+    .hero { background:linear-gradient(135deg,#385B4A,#607B6C); color:#fff; }
+    .hero h2 { margin:0 0 8px; font-size:24px; color:#F7F4EE; }
+    .hero p { margin:4px 0; }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .metric { background:#F4F7F5; border-radius:14px; padding:12px; }
+    .metric .num { font-size:24px; font-weight:700; color:var(--green); }
+    .metric .lab { font-size:12px; color:var(--muted); }
+    .progress { height:12px; background:#d8e2dc; border-radius:99px; overflow:hidden; margin-top:8px; }
+    .progress > div { height:100%; background:var(--green); width:0%; }
+    h2,h3 { color:var(--green); }
+    h3 { margin:8px 0 6px; }
+    .meal { padding:10px 0; border-bottom:1px solid #eee7dc; }
+    .meal:last-child { border-bottom:0; }
+    .tag { display:inline-block; background:#EEF5F1; color:var(--green); padding:4px 8px; border-radius:999px; font-size:12px; font-weight:600; }
+    button { border:0; background:var(--green); color:#fff; border-radius:12px; padding:11px 14px; font-size:15px; font-weight:600; }
+    button.secondary { background:#E8EFEA; color:var(--green); }
+    button.ghost { background:#F2ECE4; color:var(--brown); }
+    .swapbtn { margin-top:8px; background:#EEF5F1; color:var(--green); padding:8px 11px; font-size:13px; }
+    .swap-panel { margin-top:10px; padding:10px; border-radius:12px; background:#F7FAF8; border:1px solid #DDE9E2; }
+    .swap-panel select { margin-bottom:8px; }
+    input, select, textarea { width:100%; font-size:16px; padding:11px 12px; border:1px solid #d9d2c7; border-radius:12px; background:#fff; color:var(--text); }
+    .row { display:flex; gap:8px; align-items:center; }
+    .row > * { flex:1; }
+    .check { display:flex; align-items:center; gap:10px; padding:9px 0; }
+    .check input { width:22px; height:22px; }
+    nav { position:fixed; bottom:0; left:0; right:0; background:rgba(255,255,255,.97); backdrop-filter:blur(12px); border-top:1px solid #ddd; padding:8px 8px calc(env(safe-area-inset-bottom) + 8px); display:flex; justify-content:space-around; z-index:10; }
+    nav button { background:transparent; color:#657068; padding:6px 9px; font-size:11px; border-radius:10px; }
+    nav button.active { color:var(--green); background:#EEF5F1; }
+    .navicon { display:block; font-size:20px; margin-bottom:2px; }
+    .hidden { display:none; }
+    .recipe { border-top:1px solid #eee7dc; padding-top:12px; margin-top:12px; }
+    .small { font-size:13px; color:var(--muted); }
+    .notice { background:#FFF8E7; border:1px solid #EFDCA9; color:#70561E; border-radius:14px; padding:12px; }
+    .quote { font-style:italic; color:var(--brown); background:#FBF7F2; padding:12px; border-radius:14px; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th,td { padding:9px 6px; border-bottom:1px solid #eee; text-align:left; }
+    th { color:var(--green); }
+    @media(max-width:430px){ .grid2{grid-template-columns:1fr 1fr;} .card{padding:14px;} }
+  </style>
+</head>
+<body>
+<header>
+  <h1>My Wellness Plan</h1>
+  <div class="sub" id="dateLine"></div>
+</header>
+
+<main>
+  <section id="today" class="screen"></section>
+  <section id="meals" class="screen hidden"></section>
+  <section id="recipes" class="screen hidden"></section>
+  <section id="mindset" class="screen hidden"></section>
+  <section id="progress" class="screen hidden"></section>
+</main>
+
+<nav>
+  <button data-screen="today" class="active"><span class="navicon">☀️</span>Today</button>
+  <button data-screen="meals"><span class="navicon">🥗</span>Meals</button>
+  <button data-screen="recipes"><span class="navicon">🍽️</span>Recipes</button>
+  <button data-screen="mindset"><span class="navicon">🧠</span>Mindset</button>
+  <button data-screen="progress"><span class="navicon">📈</span>Progress</button>
+</nav>
+
+<script>
+const startWeight = 189, goalWeight = 160;
+
+const breakfasts = {
+  B1:"2 eggs scrambled with bell pepper/spinach + 1 slice whole-grain toast + berries",
+  B2:"1/2 cup dry oats with unsweetened oat milk, cinnamon and berries + 2 eggs",
+  B3:"Garden of Life Raw & Greens protein shake with unsweetened oat milk, ice and berries; add a boiled egg if needed",
+  B4:"Plain Greek yogurt + berries + 1 Tbsp walnuts + 1 boiled egg",
+  B5:"2 eggs with peppers/spinach in a whole-grain or high-fiber tortilla"
+};
+const lunches = {
+  L1:"Turkey-avocado wrap + raw vegetables",
+  L2:"Tuna crunch plate + cucumber/bell pepper + whole-grain crackers + fruit",
+  L3:"Egg & avocado plate + cucumber/tomato + fruit",
+  L4:"Turkey hummus pita + lettuce/cucumber + raw vegetables",
+  L5:"Salmon pouch over bagged greens + cucumber/bell pepper + light vinaigrette + fruit",
+  L6:"Quick egg scramble + whole-grain toast + fruit",
+  L7:"Snack-box lunch: turkey roll-ups, boiled egg, raw vegetables, hummus and fruit"
+};
+const snackOptions = [
+  "Apple + almonds","Egg + fruit","Hummus + vegetables","Yogurt + berries",
+  "Turkey + cucumber","Fruit + almonds","Small protein shake"
+];
+
+const recipes = [
+  ["R1","Lemon Garlic Salmon with Broccoli & Sweet Potato",
+   ["4-5 oz salmon fillet","1-2 cups broccoli","1 small sweet potato","1 tsp olive oil","Lemon, garlic powder, pepper"],
+   "Heat oven to 400°F. Cook sweet potato until tender. Place salmon and broccoli on a sheet pan. Lightly oil broccoli; season salmon with lemon, garlic and pepper. Bake 12-15 minutes, until salmon flakes and is cooked through."],
+  ["R2","Beef Fajita Bowl",
+   ["4-5 oz lean beef fajita strips","1 cup sliced bell peppers/onion","1/2 cup cooked Spanish rice","1 tsp oil","Fajita seasoning, salsa"],
+   "Cook beef until browned and safely cooked; remove. Sauté peppers/onion until crisp-tender. Return beef and season. Serve over Spanish rice with salsa."],
+  ["R3","Slow-Cooker Teriyaki Chicken",
+   ["4-5 oz boneless skinless chicken per serving","Broccoli","1/2 cup cooked rice","Lower-sodium teriyaki sauce","Garlic/ginger if desired"],
+   "Place chicken in slow cooker with enough teriyaki sauce to lightly coat. Cook LOW 4-6 hours or until safely cooked. Steam broccoli separately and serve with rice."],
+  ["R4","Grilled Hamburger Patty Plate",
+   ["4-5 oz lean ground beef patty","1-2 cups fresh green beans","1 small golden potato","Mustard or preferred low-sugar condiment"],
+   "Grill or skillet-cook the patty to a safe internal temperature. Roast or air-fry the potato. Steam or sauté green beans. Serve as a plate; add a bun only if desired and reduce the potato."],
+  ["R5","Oven Breaded Chicken with Asparagus",
+   ["4-5 oz chicken breast/tenderloins","2 Tbsp whole-wheat or panko crumbs","Asparagus","1 small golden potato","1 tsp olive oil"],
+   "Heat oven to 425°F. Press seasoned crumbs onto chicken. Place chicken, asparagus and potato pieces on a sheet pan; lightly oil vegetables. Bake until chicken is safely cooked and vegetables are tender."],
+  ["R6","Sheet-Pan Salmon, Green Beans & Potatoes",
+   ["4-5 oz salmon","1-2 cups green beans","1 small golden potato, cubed","1 tsp olive oil","Lemon, dill or garlic"],
+   "Heat oven to 425°F. Roast potato cubes 15 minutes. Add green beans and salmon; roast another 12-15 minutes until salmon is cooked through."],
+  ["R7","Beef & Green Bean Skillet",
+   ["4-5 oz lean beef strips","1-2 cups fresh green beans","1/2 cup cooked rice","1 tsp oil","Garlic, lower-sodium soy sauce"],
+   "Brown beef and set aside. Cook green beans with a splash of water. Return beef, add garlic and a little soy sauce. Serve over rice."],
+  ["R8","Baked Fish Tacos",
+   ["4-5 oz white fish","2 small corn tortillas","Shredded lettuce/cabbage","Salsa","1/4 avocado","Lime, cumin, garlic"],
+   "Season fish with cumin, garlic and lime. Bake at 400°F about 10-12 minutes or until cooked through. Divide among tortillas and top with vegetables, salsa and avocado."],
+  ["R9","Beef Stuffed Peppers",
+   ["1 large bell pepper, halved","4 oz lean ground beef","1/3-1/2 cup cooked rice","Diced tomato or salsa"],
+   "Heat oven to 375°F. Brown beef. Mix with rice and tomato/salsa. Fill pepper halves, cover and bake about 25 minutes; uncover 5-10 minutes until tender."],
+  ["R10","Slow-Cooker Salsa Chicken",
+   ["4-5 oz chicken per serving","Salsa","Bell peppers/onion","1/2 cup rice OR small tortilla","Optional avocado"],
+   "Put chicken, salsa and vegetables in slow cooker. Cook LOW 4-6 hours or until safely cooked. Shred and serve with rice or one small tortilla."],
+  ["R11","Salmon Rice Bowl",
+   ["4-5 oz salmon","1/2 cup cooked rice","Cucumber","Bell pepper","Broccoli","1 tsp lower-sodium soy sauce or light dressing"],
+   "Cook salmon. Build bowl with rice, cucumber, bell pepper and steamed broccoli. Top with salmon and a small amount of sauce."],
+  ["R12","Beef & Broccoli",
+   ["4-5 oz lean beef strips","1.5-2 cups broccoli","1/2 cup cooked rice","1 tsp oil","Garlic/ginger","Lower-sodium soy sauce"],
+   "Sear beef and remove. Stir-fry broccoli. Return beef, add garlic/ginger and a little soy sauce. Serve over rice."],
+  ["R13","Oven Chicken Wings with Celery & Carrots",
+   ["5-6 small chicken wing pieces","Celery sticks","Carrot sticks","Side salad if desired","Garlic, paprika, pepper"],
+   "Bake or air-fry wings at 400°F until browned, crisp and safely cooked, turning once. Serve with celery and carrots."],
+  ["R14","Burger Bowl",
+   ["4-5 oz lean ground beef","2 cups lettuce","Tomato/cucumber","1/4 avocado","Mustard/pickle if desired","Small roasted golden potato or 1/2 cup beans/corn"],
+   "Brown beef with garlic and pepper. Build a large salad bowl, add beef and avocado, then one controlled carbohydrate side."]
+];
+
+const schedule = [
+["B1","L1","Apple + almonds","R1"],
+["B3","L2","Egg + fruit","R2"],
+["B2","L3","Hummus + vegetables","R3"],
+["B1","L4","Yogurt + berries","R4"],
+["B3","L5","Turkey + cucumber","R5"],
+["B5","L7","Fruit + almonds","R6"],
+["B2","L6","Small protein shake","R7"],
+["B1","L1","Egg + fruit","R8"],
+["B3","L2","Apple + almonds","R9"],
+["B2","L3","Hummus + vegetables","R10"],
+["B5","L4","Yogurt + berries","R11"],
+["B1","L5","Turkey + cucumber","R12"],
+["B3","L7","Fruit + almonds","R13"],
+["B2","L6","Small protein shake","R14"],
+["B1","L1","Apple + almonds","R6"],
+["B3","L2","Egg + fruit","R2"],
+["B2","L3","Hummus + vegetables","R10"],
+["B5","L4","Yogurt + berries","R7"],
+["B1","L5","Turkey + cucumber","R1"],
+["B3","L7","Fruit + almonds","R5"],
+["B2","L6","Small protein shake","R9"],
+["B1","L1","Egg + fruit","R11"],
+["B3","L2","Apple + almonds","R4"],
+["B2","L3","Hummus + vegetables","R3"],
+["B5","L4","Yogurt + berries","R8"],
+["B1","L5","Turkey + cucumber","R12"],
+["B3","L7","Fruit + almonds","R13"],
+["B2","L6","Small protein shake","R14"]
+];
+
+const workouts = [
+  "Indoor cycling - 25-30 min",
+  "Pilates + strength - 20-25 min",
+  "Easy walk - 20-30 min / recovery",
+  "Indoor cycling - 30 min",
+  "Pilates + strength - 20-25 min",
+  "Indoor cycling - 35-40 min easy/moderate",
+  "Rest, stretching or easy walk"
+];
+
+const mindset = [
+ ["Week 1 - Hear Hunger","I can notice hunger without fearing it. When my body needs food, I feed it. When I am satisfied, I can stop."],
+ ["Week 2 - Satisfied Is Enough","I enjoy my food more when I slow down. I notice the moment hunger fades. Comfortable satisfaction is enough."],
+ ["Week 3 - Cravings Are Not Commands","A craving is information, not an order. I can wait ten minutes and choose deliberately. No food is forbidden."],
+ ["Week 4 - This Is How I Care for Myself","I am becoming someone who cares for my body consistently. One unusual meal does not change who I am."]
+];
+
+const store = {
+ get(k, d){ try { const v=localStorage.getItem(k); return v===null?d:JSON.parse(v); } catch(e){return d;} },
+ set(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
+};
+
+function dayIndex(){
+  const custom = store.get("cycleDay", null);
+  if(custom) return custom-1;
+  const d = new Date();
+  return (d.getDate()-1)%28;
+}
+function recipeById(id){ return recipes.find(r=>r[0]===id); }
+function getMealOverrides(){ return store.get("mealOverrides",{}); }
+function mealForDay(i){
+  const base=schedule[i].slice(), o=getMealOverrides()[i]||{};
+  return [o.breakfast||base[0],o.lunch||base[1],o.snack||base[2],o.dinner||base[3]];
+}
+function swapMeal(day,type){
+  const s=mealForDay(day); let label="",options=[],current="";
+  if(type==="breakfast"){label="Breakfast";options=Object.entries(breakfasts).map(([k,v])=>[k,`${k} - ${v}`]);current=s[0];}
+  if(type==="lunch"){label="Lunch";options=Object.entries(lunches).map(([k,v])=>[k,`${k} - ${v}`]);current=s[1];}
+  if(type==="snack"){label="Snack";options=snackOptions.map(v=>[v,v]);current=s[2];}
+  if(type==="dinner"){label="Dinner";options=recipes.map(r=>[r[0],`${r[0]} - ${r[1]}`]);current=s[3];}
+  const panel=document.getElementById("swapPanel");
+  panel.innerHTML=`<div class="swap-panel"><b>Swap ${label}</b><select id="swapSelect">${options.map(([v,t])=>`<option value="${v}" ${v===current?"selected":""}>${t}</option>`).join("")}</select><div class="row"><button onclick="saveMealSwap(${day},'${type}')">Save swap</button><button class="ghost" onclick="resetMealSwap(${day},'${type}')">Use original</button></div></div>`;
+  panel.scrollIntoView({behavior:"smooth",block:"center"});
+}
+function saveMealSwap(day,type){
+  const all=getMealOverrides(),o=all[day]||{};
+  o[type]=document.getElementById("swapSelect").value; all[day]=o;
+  store.set("mealOverrides",all); renderToday(); renderMeals();
+}
+function resetMealSwap(day,type){
+  const all=getMealOverrides(),o=all[day]||{}; delete o[type];
+  if(Object.keys(o).length) all[day]=o; else delete all[day];
+  store.set("mealOverrides",all); renderToday(); renderMeals();
+}
+function screen(name){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.add("hidden"));
+  document.getElementById(name).classList.remove("hidden");
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.screen===name));
+}
+function saveCheck(key, val){ const c=store.get("checks",{}); c[key]=val; store.set("checks",c); renderToday(); }
+function getCheck(key){ return !!store.get("checks",{})[key]; }
+
+function renderToday(){
+  const i=dayIndex(), s=mealForDay(i), r=recipeById(s[3]);
+  const week=Math.floor(i/7), currentWeight=store.get("currentWeight", startWeight);
+  const pct=Math.max(0,Math.min(100,((startWeight-currentWeight)/(startWeight-goalWeight))*100));
+  const milestone = [185,180,175,170,165,160].find(x=>x<currentWeight) || 160;
+  document.getElementById("today").innerHTML = `
+    <div class="card hero">
+      <h2>Day ${i+1} of 28</h2>
+      <p>${mindset[week][0]}</p>
+      <p style="opacity:.9">${mindset[week][1]}</p>
+    </div>
+    <div class="grid2">
+      <div class="metric"><div class="num">${currentWeight}</div><div class="lab">current lb</div></div>
+      <div class="metric"><div class="num">${milestone}</div><div class="lab">next milestone</div></div>
+    </div>
+    <div class="card">
+      <h3>Progress to 160</h3>
+      <div class="progress"><div style="width:${pct}%"></div></div>
+      <div class="small" style="margin-top:6px">${Math.round(pct)}% of the way from 189 to 160</div>
+    </div>
+    <div class="card">
+      <h2>Today's meals</h2>
+      <div class="meal"><span class="tag">Breakfast</span><div>${breakfasts[s[0]]}</div><button class="swapbtn" onclick="swapMeal(${i},'breakfast')">↔ Swap</button></div>
+      <div class="meal"><span class="tag">Lunch</span><div>${lunches[s[1]]}</div><button class="swapbtn" onclick="swapMeal(${i},'lunch')">↔ Swap</button></div>
+      <div class="meal"><span class="tag">Snack</span><div>${s[2]}</div><button class="swapbtn" onclick="swapMeal(${i},'snack')">↔ Swap</button></div>
+      <div class="meal"><span class="tag">Dinner</span><div><b>${r[1]}</b></div><button class="swapbtn" onclick="swapMeal(${i},'dinner')">↔ Swap</button></div>
+      <div id="swapPanel"></div>
+      <button class="secondary" onclick="openRecipe('${r[0]}')">View dinner recipe</button>
+    </div>
+    <div class="card">
+      <h2>Today's movement</h2>
+      <p>${workouts[new Date().getDay()===0?6:new Date().getDay()-1]}</p>
+      <div class="check"><input type="checkbox" ${getCheck("exercise-"+i)?"checked":""} onchange="saveCheck('exercise-${i}',this.checked)"><span>Exercise completed</span></div>
+      <div class="check"><input type="checkbox" ${getCheck("walk-"+i)?"checked":""} onchange="saveCheck('walk-${i}',this.checked)"><span>10-minute walk after largest meal</span></div>
+    </div>
+    <div class="card">
+      <h2>15-minute mindset session</h2>
+      <p>2 min slow breathing → 3 min progressive relaxation → 7 min visualizing this week's behavior → 3 min gently returning attention.</p>
+      <div class="quote">${mindset[week][1]}</div>
+      <div class="check"><input type="checkbox" ${getCheck("mindset-"+i)?"checked":""} onchange="saveCheck('mindset-${i}',this.checked)"><span>Mindset session completed</span></div>
+    </div>
+    <div class="notice">No restart Mondays. One unusual meal is one unusual meal. The next meal simply returns to normal.</div>
+  `;
+}
+
+function renderMeals(){
+  let rows=schedule.map((base,i)=>{
+    const s=mealForDay(i);
+    const r=recipeById(s[3]);
+    return `<tr><td>${i+1}</td><td>${s[0]}</td><td>${s[1]}</td><td>${s[2]}</td><td>${r[1]}</td></tr>`
+  }).join("");
+  document.getElementById("meals").innerHTML=`
+    <div class="card">
+      <h2>28-Day Meal Rotation</h2>
+      <p class="small">Repeat this cycle each month. Tap Today after setting a cycle day below.</p>
+      <div class="row">
+        <select id="cycleSelect">${Array.from({length:28},(_,i)=>`<option value="${i+1}" ${dayIndex()===i?"selected":""}>Day ${i+1}</option>`).join("")}</select>
+        <button onclick="setCycleDay()">Use day</button>
+      </div>
+    </div>
+    <div class="card" style="overflow:auto">
+      <table><thead><tr><th>Day</th><th>B</th><th>L</th><th>Snack</th><th>Dinner</th></tr></thead><tbody>${rows}</tbody></table>
+    </div>
+    <div class="card">
+      <h3>Fresh lunch key</h3>
+      ${Object.entries(lunches).map(([k,v])=>`<p><b>${k}:</b> ${v}</p>`).join("")}
+    </div>
+  `;
+}
+
+function renderRecipes(){
+  document.getElementById("recipes").innerHTML=`
+    <div class="card"><h2>Dinner Recipes</h2><p class="small">Written for one weight-loss portion. Multiply ingredients for your household.</p></div>
+    ${recipes.map(r=>`
+      <div class="card recipe" id="${r[0]}">
+        <h3>${r[0]} - ${r[1]}</h3>
+        <b>Ingredients</b>
+        <ul>${r[2].map(x=>`<li>${x}</li>`).join("")}</ul>
+        <b>Method</b><p>${r[3]}</p>
+      </div>`).join("")}
+  `;
+}
+
+function renderMindset(){
+  document.getElementById("mindset").innerHTML=`
+    <div class="card">
+      <h2>Oneleaf-Inspired Mindset Practice</h2>
+      <p>Use about 15 minutes in a quiet place, ideally before dinner or your most vulnerable snacking time.</p>
+      <p><b>2 minutes:</b> slow breathing<br><b>3 minutes:</b> progressive relaxation<br><b>7 minutes:</b> visualize the week's behavior and repeat the suggestion<br><b>3 minutes:</b> return attention to the room</p>
+    </div>
+    ${mindset.map((m,i)=>`<div class="card"><h3>${m[0]}</h3><div class="quote">${m[1]}</div></div>`).join("")}
+    <div class="card">
+      <h3>10-Minute Craving Practice</h3>
+      <p>Name the craving. Wait 10 minutes while doing something else. Then decide. If you still want the food, portion it and eat it intentionally.</p>
+      <h3>Meal Pause</h3>
+      <p>About halfway through, put the fork down briefly and ask: “Am I still physically hungry?” Continue if yes. Stop at comfortable satisfaction.</p>
+    </div>
+  `;
+}
+
+function renderProgress(){
+  const logs=store.get("weights",[]);
+  document.getElementById("progress").innerHTML=`
+    <div class="card">
+      <h2>Weight Progress</h2>
+      <div class="row">
+        <input id="weightInput" type="number" step="0.1" placeholder="Today's weight">
+        <button onclick="addWeight()">Save</button>
+      </div>
+      <p class="small">Starting weight 189 lb · Goal 160 lb</p>
+    </div>
+    <div class="card">
+      <h3>Milestones</h3>
+      <p>185 → 180 → 175 → 170 → 165 → 160</p>
+    </div>
+    <div class="card">
+      <h3>History</h3>
+      ${logs.length?`<table><thead><tr><th>Date</th><th>Weight</th></tr></thead><tbody>${logs.slice().reverse().map(x=>`<tr><td>${x.date}</td><td>${x.weight} lb</td></tr>`).join("")}</tbody></table>`:"<p>No entries yet.</p>"}
+      ${logs.length?`<button class="ghost" style="margin-top:10px" onclick="clearWeights()">Clear history</button>`:""}
+    </div>
+    <div class="card">
+      <h3>Weekly check-in</h3>
+      <p>1. Did I follow my normal meal rhythm most days?</p>
+      <p>2. How many planned exercise sessions did I complete?</p>
+      <p>3. Did I notice hunger and satisfaction?</p>
+      <p>4. What one change would make next week easier?</p>
+    </div>
+  `;
+}
+
+function setCycleDay(){
+  store.set("cycleDay", Number(document.getElementById("cycleSelect").value));
+  renderToday(); renderMeals(); screen("today");
+}
+function addWeight(){
+  const el=document.getElementById("weightInput"), w=Number(el.value);
+  if(!w || w<80 || w>400) return alert("Please enter a valid weight.");
+  const logs=store.get("weights",[]);
+  const date=new Date().toLocaleDateString();
+  logs.push({date,weight:w});
+  store.set("weights",logs); store.set("currentWeight",w);
+  el.value=""; renderProgress(); renderToday();
+}
+function clearWeights(){
+  if(confirm("Clear saved weight history on this device?")){
+    store.set("weights",[]); store.set("currentWeight",startWeight); renderProgress(); renderToday();
+  }
+}
+function openRecipe(id){ renderRecipes(); screen("recipes"); setTimeout(()=>document.getElementById(id)?.scrollIntoView({behavior:"smooth"}),50); }
+
+document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>screen(b.dataset.screen)));
+document.getElementById("dateLine").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
+renderToday(); renderMeals(); renderRecipes(); renderMindset(); renderProgress();
+
+if("serviceWorker" in navigator){ window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{})); }
+</script>
+</body>
+</html>
